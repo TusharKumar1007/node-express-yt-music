@@ -14,8 +14,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Create HTTP server and attach Socket.io
-const server = http.createServer(app);
-const io = new Server(server);
+// const server = http.createServer(app);
+// const io = new Server(server);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,18 +30,23 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Ensure the views folder is set
 
 // Set security-related HTTP headers
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
-    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://vercel.live"],
-    frameSrc: ["https://vercel.live"],
-    imgSrc: ["'self'", "data:", "https:"],
-    connectSrc: ["'self'", "https://vercel.live"], // Ensure this is also set for socket connections
-  },
-}));
-
-
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://vercel.live",
+      ],
+      frameSrc: ["https://vercel.live"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://vercel.live"], // Ensure this is also set for socket connections
+    },
+  })
+);
 
 // Render the correct form for user input (index.ejs)
 app.get("/", (req, res) => {
@@ -99,6 +104,10 @@ process.on("exit", () => {
 });
 
 // Start the server
-server.listen(port, () => {
+// server.listen(port, () => {
+//   console.log(`Server is running on http://localhost:${port}`);
+// });
+
+app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
