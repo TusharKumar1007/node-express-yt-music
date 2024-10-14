@@ -30,17 +30,17 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Ensure the views folder is set
 
 // Set security-related HTTP headers
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-    },
-  })
-);
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
+    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+    frameSrc: ["https://vercel.live"],
+    imgSrc: ["'self'", "data:", "https:"],
+    connectSrc: ["'self'"],
+  },
+}));
+
 
 // Render the correct form for user input (index.ejs)
 app.get("/", (req, res) => {
