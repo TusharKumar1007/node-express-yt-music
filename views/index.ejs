@@ -32,14 +32,18 @@
           <button class="btn" type="submit">Download Audio</button>
         </form>
 
+        <%if(locals.errorMessage){%>
+
+        <div id="errorMessage"><%=errorMessage%> </div>
+        <%}else{%>
         <div id="progress-bar">
           <div id="progress">0%</div>
+          <%}%>
         </div>
       </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/script.js">
-    </script>
+    <script src="/script.js"></script>
   </body>
 </html>

@@ -162,3 +162,8 @@ a {
 }
 
 
+#errorMessage{
+  margin-top: 2rem;
+  color: #f94c10;
+  font-size: 1.8rem;
+}

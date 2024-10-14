@@ -5,13 +5,13 @@ import { createWriteStream, existsSync, unlinkSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import helmet from "helmet";
+// import helmet from "helmet";
 import http from "http";
 import { Server } from "socket.io";
 
 // Set up Express
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Create HTTP server and attach Socket.io
 const server = http.createServer(app);
@@ -30,18 +30,18 @@ const __dirname = dirname(__filename);
 //     res.sendFile(path.join(__dirname, "public", "audio.html"));
 //   });
 
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      frameSrc: ["https://vercel.live"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-    },
-  })
-);
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
+//       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+//       frameSrc: ["https://vercel.live"],
+//       imgSrc: ["'self'", "data:", "https:"],
+//       connectSrc: ["'self'"],
+//     },
+//   })
+// );
 
 app.get("/", (req, res) => {
   res.render("index.ejs", {});
@@ -91,7 +91,9 @@ app.post("/download", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching video info:", error);
-    res.status(500).send("Error fetching video information");
+    // res.status(500).send("Error fetching video information");
+    // res.render("index.ejs", { errorMessage: "Please enter a valid URL." });
+    res.redirect("/");
   }
 });
 
