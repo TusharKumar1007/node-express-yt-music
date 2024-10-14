@@ -34,12 +34,13 @@ app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ["'self'"],
     scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
-    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://vercel.live"],
     frameSrc: ["https://vercel.live"],
     imgSrc: ["'self'", "data:", "https:"],
-    connectSrc: ["'self'"],
+    connectSrc: ["'self'", "https://vercel.live"], // Ensure this is also set for socket connections
   },
 }));
+
 
 
 // Render the correct form for user input (index.ejs)
