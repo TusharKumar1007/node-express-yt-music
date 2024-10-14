@@ -145,3 +145,20 @@ a {
 #progress {
   font-size: 1.6rem;
 }
+
+
+@media (max-width: 600px) {
+  .url__input {
+    width: 90%; /* Adjust input width for smaller screens */
+  }
+
+  h1 {
+    font-size: 3rem; /* Reduce font size of the heading */
+  }
+
+  .btn {
+    width: 100%; /* Full width for the button */
+  }
+}
+
+
