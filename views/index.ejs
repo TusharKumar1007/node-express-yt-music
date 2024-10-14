@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YTMusic downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" href="/image/headphone.png">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="wrapper">
+        <h1>Download Audio</h1>
+        <form id="download-form" method="POST" action="/download">
+          <!-- <label for="url">YouTube Video URL:</label> -->
+          <input
+            class="url__input"
+            type="text"
+            id="url"
+            name="url"
+            placeholder="Youtube video link "
+            spellcheck="false"
+            required
+            autofocus
+          />
+          <button class="btn" type="submit">Download Audio</button>
+        </form>
+
+        <div id="progress-bar">
+          <div id="progress">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const progressBarContainer = document.getElementById("progress-bar");
+      const progressBar = document.getElementById("progress");
+      const downloadForm = document.getElementById("download-form");
+
+      // Listen for progress updates from the server
+      socket.on("audioProgress", (progress) => {
+        progressBar.style.width = `${progress}%`;
+        progressBar.textContent = `${progress}%`;
+      });
+
+      // Show progress bar and reset it on form submission
+      downloadForm.addEventListener("submit", () => {
+        progressBarContainer.style.display = "block"; // Show the progress bar
+        progressBar.style.width = "0%";
+        progressBar.textContent = "0%";
+      });
+    </script>
+  </body>
+</html>

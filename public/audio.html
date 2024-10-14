@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download YouTube Audio</title>
+  <style>
+    #progress-bar {
+      width: 100%;
+      background-color: #ddd;
+      margin-top: 20px;
+    }
+    #progress {
+      width: 0%;
+      height: 30px;
+      background-color: #4caf50;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Download YouTube Audio</h1>
+  <form id="download-form" method="POST" action="/download">
+    <label for="url">YouTube Video URL:</label>
+    <input type="text" id="url" name="url" required>
+    <button type="submit">Download Audio</button>
+  </form>
+
+  <div id="progress-bar">
+    <div id="progress">0%</div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const progressBar = document.getElementById("progress");
+    const downloadForm = document.getElementById("download-form");
+
+    // Listen for progress updates from the server
+    socket.on("audioProgress", (progress) => {
+      progressBar.style.width = `${progress}%`;
+      progressBar.textContent = `${progress}%`;
+    });
+
+    // Reset progress bar on new form submission
+    downloadForm.addEventListener("submit", () => {
+      progressBar.style.width = "0%";
+      progressBar.textContent = "0%";
+    });
+  </script>
+</body>
+</html>
