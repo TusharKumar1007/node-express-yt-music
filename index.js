@@ -9,9 +9,6 @@ import { dirname } from "path";
 import http from "http";
 import { Server } from "socket.io";
 
-// Disable YTDL updates
-process.env.YTDL_NO_UPDATE = "1";
-
 // Set up Express
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,34 +25,37 @@ app.use(express.static("public")); // Serve static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Render form for user input (audio.html)
-app.get("/", (req, res) => {
-  res.render("index.ejs", {}); // or render your HTML file if not using ejs
-});
+// Render the correct form for user input (audio.html)
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, "public", "audio.html"));
+//   });
 
-// Function to fetch video info with retry logic
-async function fetchVideoInfoWithRetry(videoUrl, retries = 3, delay = 3000) {
-  try {
-    return await ytdl.getInfo(videoUrl);
-  } catch (error) {
-    if (error.statusCode === 429 && retries > 0) {
-      console.log(`Rate limited. Retrying in ${delay / 1000} seconds...`);
-      await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
-      return fetchVideoInfoWithRetry(videoUrl, retries - 1, delay * 2); // Exponential backoff
-    }
-    throw error; // If retries are exhausted or another error, throw it
-  }
-}
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
+//       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+//       frameSrc: ["https://vercel.live"],
+//       imgSrc: ["'self'", "data:", "https:"],
+//       connectSrc: ["'self'"],
+//     },
+//   })
+// );
+
+app.get("/", (req, res) => {
+  res.render("index.ejs", {});
+});
 
 // Handle form submission to download audio
 app.post("/download", async (req, res) => {
   const videoUrl = req.body.url;
-  const tempFilePath = path.join(__dirname, "temp", "audio.mp3");
+  const audioOutput = "audio.mp3";
 
   try {
-    // Fetch video information with retry logic
-    const info = await fetchVideoInfoWithRetry(videoUrl);
-    const videoTitle = info.videoDetails.title.replace(/[^\w\s]/gi, ""); // Clean up title for file name
+    // Fetch video information to get the title
+    const info = await ytdl.getInfo(videoUrl);
+    const videoTitle = info.videoDetails.title; // Get the video title
     const finalOutput = `${videoTitle}.mp3`; // Save audio with video title
 
     // Download audio
@@ -64,11 +64,12 @@ app.post("/download", async (req, res) => {
       filter: (format) => format.container === "mp4",
     });
 
-    const audioStream = createWriteStream(tempFilePath);
+    const audioStream = createWriteStream(audioOutput);
 
     // Progress tracking for audio
     audio.on("progress", (chunkLength, downloaded, total) => {
       const progress = (downloaded / total) * 100;
+      // console.log(`Audio Download Progress: ${progress.toFixed(2)}%`);
       io.emit("audioProgress", progress.toFixed(2)); // Emit progress event to client
     });
 
@@ -76,17 +77,22 @@ app.post("/download", async (req, res) => {
     audio.pipe(audioStream);
 
     audioStream.on("finish", () => {
-      res.download(tempFilePath, finalOutput, (err) => {
+      // console.log("Audio downloaded");
+
+      // Send the final audio file to the user
+      res.download(audioOutput, finalOutput, (err) => {
         if (err) {
           console.error("Error downloading file:", err);
         }
 
-        // Cleanup: delete temporary files after download
-        if (existsSync(tempFilePath)) unlinkSync(tempFilePath);
+        // Cleanup: delete temporary files
+        if (existsSync(audioOutput)) unlinkSync(audioOutput);
       });
     });
   } catch (error) {
     console.error("Error fetching video info:", error);
+    // res.status(500).send("Error fetching video information");
+    // res.render("index.ejs", { errorMessage: "Please enter a valid URL." });
     res.redirect("/");
   }
 });
