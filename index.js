@@ -5,29 +5,43 @@ import { createWriteStream, existsSync, unlinkSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-// import http from "http";
-// import { Server } from "socket.io";
+import helmet from "helmet";
+import http from "http";
+import { Server } from "socket.io";
 
 // Set up Express
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 // Create HTTP server and attach Socket.io
-// const server = http.createServer(app);
-// const io = new Server(server);
+const server = http.createServer(app);
+const io = new Server(server);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-app.use(express.static(path.join(__dirname, "public"))); // Serve static files
+app.use(express.static("public")); // Serve static files
 
 // Path for the current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Render the correct form for user input (audio.html)
 // app.get("/", (req, res) => {
 //     res.sendFile(path.join(__dirname, "public", "audio.html"));
 //   });
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      frameSrc: ["https://vercel.live"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+    },
+  })
+);
 
 app.get("/", (req, res) => {
   res.render("index.ejs", {});
@@ -82,6 +96,6 @@ app.post("/download", async (req, res) => {
 });
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
