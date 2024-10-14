@@ -1,15 +1,16 @@
 {
-    "version":2,
-    "builds":[
-        {
-            "src":"./audio.js",
-            "use":"@verce;/node"
-        }
+    "version": 2,
+    "builds": [
+      {
+        "src": "api/audio.js",
+        "use": "@vercel/node"
+      }
     ],
-    "routes":[
-        {
-            "src":"/(.*)",
-            "dest":"/"
-        }
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "api/audio.js"
+      }
     ]
-}
+  }
+  

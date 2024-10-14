@@ -5,9 +5,16 @@ import { createWriteStream, existsSync, unlinkSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import http from "http";
+import { Server } from "socket.io";
 
 // Set up Express
 const app = express();
+const port = 3000;
+
+// Create HTTP server and attach Socket.io
+const server = http.createServer(app);
+const io = new Server(server);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,9 +24,13 @@ app.use(express.static("public")); // Serve static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Render the correct form for user input (index.ejs)
+// Render the correct form for user input (audio.html)
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, "public", "audio.html"));
+//   });
+
 app.get("/", (req, res) => {
-  res.render("index.ejs", {});
+  res.render("index.ejs",{});
 });
 
 // Handle form submission to download audio
@@ -41,16 +52,19 @@ app.post("/download", async (req, res) => {
 
     const audioStream = createWriteStream(audioOutput);
 
-    // Progress tracking for audio (removed socket.io since WebSocket won't work on Vercel)
+    // Progress tracking for audio
     audio.on("progress", (chunkLength, downloaded, total) => {
       const progress = (downloaded / total) * 100;
-      console.log(`Audio Download Progress: ${progress.toFixed(2)}%`);
+      // console.log(`Audio Download Progress: ${progress.toFixed(2)}%`);
+      io.emit("audioProgress", progress.toFixed(2)); // Emit progress event to client
     });
 
     // Pipe audio stream to file
     audio.pipe(audioStream);
 
     audioStream.on("finish", () => {
+      // console.log("Audio downloaded");
+
       // Send the final audio file to the user
       res.download(audioOutput, finalOutput, (err) => {
         if (err) {
@@ -67,5 +81,7 @@ app.post("/download", async (req, res) => {
   }
 });
 
-// Export the Express app for Vercel
-export default app;
+// Start the server
+server.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
