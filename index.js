@@ -5,9 +5,8 @@ import { createWriteStream, existsSync, unlinkSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import http from "http";
-import { Server } from "socket.io";
-import helmet from "helmet";
+// import http from "http";
+// import { Server } from "socket.io";
 
 // Set up Express
 const app = express();
@@ -17,40 +16,21 @@ const port = process.env.PORT || 3000;
 // const server = http.createServer(app);
 // const io = new Server(server);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
-// Set view engine
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views")); // Ensure the views folder is set
+// Path for the current directory
 
-// Set security-related HTTP headers
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://vercel.live"],
-      styleSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        "https://fonts.googleapis.com",
-        "https://vercel.live",
-      ],
-      frameSrc: ["https://vercel.live"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://vercel.live"], // Ensure this is also set for socket connections
-    },
-  })
-);
+// Render the correct form for user input (audio.html)
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, "public", "audio.html"));
+//   });
 
-// Render the correct form for user input (index.ejs)
 app.get("/", (req, res) => {
-  res.render("index", {});
+  res.render("index.ejs", {});
 });
 
 // Handle form submission to download audio
@@ -75,6 +55,7 @@ app.post("/download", async (req, res) => {
     // Progress tracking for audio
     audio.on("progress", (chunkLength, downloaded, total) => {
       const progress = (downloaded / total) * 100;
+      // console.log(`Audio Download Progress: ${progress.toFixed(2)}%`);
       io.emit("audioProgress", progress.toFixed(2)); // Emit progress event to client
     });
 
@@ -82,6 +63,8 @@ app.post("/download", async (req, res) => {
     audio.pipe(audioStream);
 
     audioStream.on("finish", () => {
+      // console.log("Audio downloaded");
+
       // Send the final audio file to the user
       res.download(audioOutput, finalOutput, (err) => {
         if (err) {
@@ -98,16 +81,7 @@ app.post("/download", async (req, res) => {
   }
 });
 
-// Clean up temporary files on exit
-process.on("exit", () => {
-  if (existsSync(audioOutput)) unlinkSync(audioOutput);
-});
-
 // Start the server
-// server.listen(port, () => {
-//   console.log(`Server is running on http://localhost:${port}`);
-// });
-
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
