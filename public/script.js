@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Show progress bar and reset it on form submission
   downloadForm.addEventListener("submit", (e) => {
-    e.preventDefault();
     progressBarContainer.style.display = "block"; // Show the progress bar
     progressBar.style.width = "0%";
     progressBar.textContent = "0%";
